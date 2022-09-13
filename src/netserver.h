@@ -18,7 +18,7 @@
  */
 #define __NETSERVER_ERROR__(val, msg) \
         if (val < 0) {              \
-            printf("%s: %s", msg, strerror(errno)); \
+            printf("%s: %s\n", msg, strerror(errno)); \
             return;                   \
         }\
 

@@ -125,7 +125,7 @@ void server_net_start(server *srv) {
         return;
     }
 
-    printf("Starting server on port %d ..\n", srv->port);
+    printf("Starting server ..\n");
 
     // Create the socket descriptor
     srv->sockd = socket(AF_INET, SOCK_STREAM, 0);
@@ -151,7 +151,7 @@ void server_net_start(server *srv) {
     n = listen(srv->sockd, 50);
     __NETSERVER_ERROR__(n, "Failed to listen");
 
-    printf("Server listening on port %d ..\n", srv->port);
+    printf("Server is up and listening for incoming connections on port %d ..\n", srv->port);
 
     pthread_t man;
     pthread_create(&man, NULL, connection_handler, srv);

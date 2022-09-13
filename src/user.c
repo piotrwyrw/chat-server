@@ -7,17 +7,18 @@
 #include <stdlib.h>
 #include <string.h>
 
-user_info *user_info_create(int sockd, pthread_t thr, char *nick, struct sockaddr addr) {
+user_info *user_info_create(int sockd, pthread_t thr, char *nick, struct sockaddr addr, socklen_t addr_len, int id) {
     user_info *ifo = malloc(sizeof(user_info));
     ifo->sockd = sockd;
     ifo->thr = thr;
     if (!nick)
         ifo->nick = NULL;
     else {
-        ifo->nick =  malloc(strlen(nick) + 1);
-        strcpy(ifo->nick, nick);
+        ifo->nick =  strdup(nick);
     }
     ifo->addr = addr;
+    ifo->addr_len = addr_len;
+    ifo->user_id = id;
     return ifo;
 }
 

@@ -24,7 +24,7 @@ int main(int argc, char **argv) {
         char *val = argv[++ i];
         if (strcmp(arg, "--port") == 0 || strcmp(arg, "-p") == 0) {
             if (!check_is_number(val)) {
-                printf("The value of the parameter '%s' is expected to be a positive integer.\n", val);
+                printf("The value of the parameter '%s' is expected to be a positive integer.\n", arg);
                 goto exit;
             }
             s->port = atoi(val);

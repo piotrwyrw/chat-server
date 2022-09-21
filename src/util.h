@@ -11,5 +11,6 @@
         (x >= '0' && x <= '9')
 
 bool check_is_number(char *);
+void clear_buffer(char *);
 
 #endif //CHATSERVER_UTIL_H

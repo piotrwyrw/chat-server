@@ -12,3 +12,8 @@ bool check_is_number(char *str) {
             return false;
     return true;
 }
+
+void clear_buffer(char *buff) {
+    for (unsigned int i = 0; i < strlen(buff); i ++)
+        buff[i] = 0;
+}

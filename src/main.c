@@ -39,9 +39,12 @@ int main(int argc, char **argv) {
 
     start:
     server_net_start(s);
+    goto only_return;
 
     exit:
     server_destroy(s);
+
+    only_return:
 
     return 0;
 }

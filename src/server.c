@@ -42,6 +42,7 @@ bool server_remove_usr(server *srv, user_info *ifo) {
         if (srv->users[i])
             if (user_info_compare(ifo, srv->users[i])) {
                 user_info_destroy(srv->users[i]);
+                srv->users[i] = NULL;
                 return true;
             }
     return false;

@@ -4,6 +4,7 @@
 
 #include "netserver.h"
 #include "netmsg.h"
+#include "util.h"
 
 #include <unistd.h>
 #include <stdio.h>
@@ -32,12 +33,21 @@ void server_net_broadcast(server *srv, global_message *msg) {
         }
 }
 
+void server_net_broadcast_simple(server *srv, char *str) {
+    global_message *m = global_message_create("@Server", str, message_type_regular);
+    server_net_broadcast(srv, m);
+    global_message_destroy(m);
+}
+
 void server_net_shutdown(server *srv) {
-    for (int i = 0; i < __SERVER_MAX_USERS__; i ++)
-        if (srv->users[i] != NULL) {
+    if (srv == NULL)
+        return;
+    for (int i = 0; i < __SERVER_MAX_USERS__; i ++) {
+        if (srv->users[i]) {
             pthread_cancel(srv->users[i]->thr);
             close(srv->users[i]->sockd);
         }
+    }
     close(srv->sockd);
 }
 
@@ -46,7 +56,10 @@ void *handle_net_user(void *param) {
 
     // Extract the structs
     user_info *usr = ifo->usr;
+
     server *srv = ifo->srv;
+
+    thread_info_destroy(ifo);
 
     usr->thr = pthread_self();
 
@@ -59,19 +72,34 @@ void *handle_net_user(void *param) {
     message_net_send_nostruct(NULL, "Hello, world!", message_type_regular, usr->sockd);
 
     int n;
-    char buff[100] = {0};
+    char *buff = malloc(100);
 
     while (true) {
         n = recv(usr->sockd, buff, (size_t) 100, 0);
         if (n < 0) {
-            printf("Failed to received incoming data: %s.\n", strerror(errno));
+            printf("Failed to receive incoming data: %s.\n", strerror(errno));
             continue;
         }
-        if (strcmp(buff, "shutdown") == 0 || strcmp(buff, "shutdown\n") == 0) {
-            server_net_close = true;
+        if (n == 0) {
+            printf("User %d disconnected.\n", usr->user_id);
+            server_remove_usr(srv, usr);
+            goto disconnect;
         }
-        printf("[%d] %s", usr->user_id, buff);
+        buff[n - 1] = 0;
+        printf("%d <wrote> [%s]\n", usr->user_id, buff);
+        if (strcmp(buff, "shutdown") == 0 || strcmp(buff, "shutdown\n") == 0) {
+            server_net_broadcast_simple(srv, "Server is shutting down ..");
+            server_net_close = true;
+            free(buff);
+            break;
+        }
+        clear_buffer(buff);
     }
+
+    while (true) {}
+
+    disconnect:
+    pthread_exit(NULL);
 
 }
 
@@ -160,7 +188,6 @@ void server_net_start(server *srv) {
     // Wait for a close request
     while (!server_net_close) {}
 
-    server_net_shutdown(srv);
     pthread_cancel(man);
 
     server_destroy(srv);
